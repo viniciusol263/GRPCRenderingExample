@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+option go_package = "/pb";
+
+
+service Renderer {
+    rpc CreatePolygons(stream Triangle) returns (stream Polygon) {}
+    rpc CreateTriangle(stream Point) returns (Triangle) {}
+    rpc SearchPoint(Point) returns (Triangle) {}
+    rpc GetPolyTriangles(Polygon) returns (stream Triangle) {}
+    rpc ListOfTriangles(Void) returns (stream Triangle) {}
+    rpc ListOfPolygons(Void) returns (stream Polygon) {}
+}
+
+message Void {
+
+}
+
+message Point {
+    float x = 1;
+    float y = 2;
+}
+
+message Triangle {
+    int32 trId = 1;
+    Point vertice_1 = 2;
+    Point vertice_2 = 3;
+    Point vertice_3 = 4;
+}
+
+message Polygon {
+    string polyName = 1;
+    int32 numTriangles = 2;
+    repeated Triangle triangles = 3;
+}
+
