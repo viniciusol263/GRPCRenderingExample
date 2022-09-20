@@ -59,7 +59,7 @@ func executeCreateTriangle(listPoints []*pb.Point, client pb.RendererClient) (*T
 	}
 	triangle, err := stream.CloseAndRecv()
 	if err != nil {
-		return &TriangleStruct{}, err
+		return nil, err
 	}
 	triangleStructure, _ := NewTriangleStruct(triangle)
 
@@ -70,9 +70,9 @@ func executeCreateTriangle(listPoints []*pb.Point, client pb.RendererClient) (*T
 func getPolygonList(client pb.RendererClient) ([]*pb.Polygon, error) {
 	var polygonList []*pb.Polygon
 
-	stream, err := client.ListOfPolygons(context.Background(), &pb.Void{})
+	stream, err := client.ListOfPolygons(context.Background(), nil)
 	if err != nil {
-		return []*pb.Polygon{}, err
+		return nil, err
 	}
 	for {
 		polygon, err := stream.Recv()
@@ -80,7 +80,7 @@ func getPolygonList(client pb.RendererClient) ([]*pb.Polygon, error) {
 			break
 		}
 		if err != nil {
-			return []*pb.Polygon{}, err
+			return nil, err
 		}
 		polygonList = append(polygonList, polygon)
 		log.Printf("Received polygon %+v\n", polygon)
@@ -91,9 +91,9 @@ func getPolygonList(client pb.RendererClient) ([]*pb.Polygon, error) {
 
 func getTriangleList(client pb.RendererClient) ([]*pb.Triangle, error) {
 	var triangleList []*pb.Triangle
-	stream, err := client.ListOfTriangles(context.Background(), &pb.Void{})
+	stream, err := client.ListOfTriangles(context.Background(), nil)
 	if err != nil {
-		return []*pb.Triangle{}, err
+		return nil, err
 	}
 	for {
 		triangle, err := stream.Recv()
@@ -101,7 +101,7 @@ func getTriangleList(client pb.RendererClient) ([]*pb.Triangle, error) {
 			break
 		}
 		if err != nil {
-			return []*pb.Triangle{}, err
+			return nil, err
 		}
 		triangleList = append(triangleList, triangle)
 		log.Printf("Received triangle %+v\n", triangle)
@@ -148,6 +148,7 @@ func executeCreatePolygon(client pb.RendererClient, listTriangle []*pb.Triangle)
 func executeGetPolyTriangles(client pb.RendererClient, in *pb.Polygon) error {
 	stream, err := client.GetPolyTriangles(context.Background(), in)
 	if err != nil {
+		// log.Printf("Error %v", err)
 		return err
 	}
 	for {
@@ -156,6 +157,7 @@ func executeGetPolyTriangles(client pb.RendererClient, in *pb.Polygon) error {
 			break
 		}
 		if err != nil {
+			// log.Printf("Error on Recv %v", err)
 			return err
 		}
 		log.Printf("Polygon %s has triangles %v\n", in.PolyName, triangle)

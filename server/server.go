@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"grpc/protobuf/pb"
 	"io"
 	"log"
@@ -11,6 +12,10 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
+)
+
+var (
+	ErrNoTriangleWithPoint = errors.New("No Triangle with a Point within")
 )
 
 type RendererServer struct {
@@ -32,13 +37,7 @@ func (r *RendererServer) SearchPoint(ctx context.Context, p *pb.Point) (*pb.Tria
 			}
 		}
 	}
-	emptyTriangle := &pb.Triangle{
-		TrId:      int32(r.triangleCount),
-		Vertice_1: &pb.Point{},
-		Vertice_2: &pb.Point{},
-		Vertice_3: &pb.Point{},
-	}
-	return emptyTriangle, nil
+	return nil, ErrNoTriangleWithPoint
 }
 
 func (r *RendererServer) CreatePolygons(stream pb.Renderer_CreatePolygonsServer) error {
