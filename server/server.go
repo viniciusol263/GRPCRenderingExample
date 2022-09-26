@@ -135,6 +135,7 @@ func (r *RendererServer) GetPolyTriangles(p *pb.Polygon, stream pb.Renderer_GetP
 }
 
 func (r *RendererServer) ListOfTriangles(v *pb.Void, stream pb.Renderer_ListOfTrianglesServer) error {
+	log.Printf("r.listTriangles: %d", len(r.listTriangles))
 	for _, triangle := range r.listTriangles {
 		err := stream.Send(triangle)
 		if err != nil {

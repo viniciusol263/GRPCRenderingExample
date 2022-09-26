@@ -1,0 +1,21 @@
+version: '3.0'
+
+services:
+  grpc-server:
+    image:  grpc-server:latest
+    build: .
+    ports:
+      - "8080:8081"
+    volumes:
+      - "/app/server"
+    depends_on:
+      - gorillamux-server
+    
+  
+  gorillamux-server:
+    image: gorillamux-server:latest
+    build: ../gorillamuxexample/
+    ports:
+      - "8081:8081"
+    volumes:
+      - "/server-dir/server"

@@ -70,7 +70,7 @@ func executeCreateTriangle(listPoints []*pb.Point, client pb.RendererClient) (*T
 func getPolygonList(client pb.RendererClient) ([]*pb.Polygon, error) {
 	var polygonList []*pb.Polygon
 
-	stream, err := client.ListOfPolygons(context.Background(), nil)
+	stream, err := client.ListOfPolygons(context.Background(), &pb.Void{})
 	if err != nil {
 		return nil, err
 	}
@@ -91,8 +91,9 @@ func getPolygonList(client pb.RendererClient) ([]*pb.Polygon, error) {
 
 func getTriangleList(client pb.RendererClient) ([]*pb.Triangle, error) {
 	var triangleList []*pb.Triangle
-	stream, err := client.ListOfTriangles(context.Background(), nil)
+	stream, err := client.ListOfTriangles(context.Background(), &pb.Void{})
 	if err != nil {
+		log.Printf("ListOfTriangles: Return with %v", err)
 		return nil, err
 	}
 	for {
@@ -101,6 +102,7 @@ func getTriangleList(client pb.RendererClient) ([]*pb.Triangle, error) {
 			break
 		}
 		if err != nil {
+			log.Printf("Recv: Return with %v", err)
 			return nil, err
 		}
 		triangleList = append(triangleList, triangle)
@@ -168,7 +170,7 @@ func executeGetPolyTriangles(client pb.RendererClient, in *pb.Polygon) error {
 
 func main() {
 	//	Starts connection with localhost on port 8081 utilizing dummy unsecure credentials
-	conn, err := grpc.Dial(":8081", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial(":8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("Dial failed! %v", err)
 	}
@@ -185,33 +187,33 @@ func main() {
 	//	Gets a list of triangles currently registered on the server
 	triangleList, err := getTriangleList(client)
 	if err != nil {
-		log.Fatalf("Error Occoured %v", triangleList)
+		log.Fatalf("getTriangleList: Error Occoured %v", triangleList)
 	}
 
 	//	Creates 2 Polygons(Each with 2 Triangles) using previously generated triangles
 	err = executeCreatePolygon(client, triangleList)
 	if err != nil {
-		log.Fatalf("Error Occoured %v", err)
+		log.Fatalf("executeCreatePolygon: Error Occoured %v", err)
 	}
 
 	//	Gets a list of polygons currently registered on the server
 	polygonList, err := getPolygonList(client)
 	if err != nil {
-		log.Fatalf("Error Occoured %v", err)
+		log.Fatalf("getPolygonList: Error Occoured %v", err)
 	}
 
 	//	Listing all triangles in a specific polygon
 	for _, polygon := range polygonList {
 		err := executeGetPolyTriangles(client, polygon)
 		if err != nil {
-			log.Fatalf("Error Occoured %v", err)
+			log.Fatalf("executeGetPolyTriangles: Error Occoured %v", err)
 		}
 	}
 	//
 	// Searching for a unique Point inside all Polygons and Triangles, and returns the containing triangle
 	triangle, err := client.SearchPoint(context.Background(), listOfPoints[1])
 	if err != nil {
-		log.Fatalf("Error Occoured %v", err)
+		log.Fatalf("SearchPoint: Error Occoured %v", err)
 	}
 	log.Printf("Point %v is a vertice on %v triangle\n", listOfPoints[1], triangle)
 
